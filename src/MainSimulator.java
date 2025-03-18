@@ -35,13 +35,13 @@ public class MainSimulator {
         int totalJobs = FileReadingThread.countJobs(filePath);
         ProcessTracker tracker = new ProcessTracker(totalJobs);
 
-        // Start the file-reading thread
-        FileReadingThread fileReaderTask = new FileReadingThread(filePath, jobQueue, tracker);
+        // Start the file-reading thread (note: tracker removed from constructor)
+        FileReadingThread fileReaderTask = new FileReadingThread(filePath, jobQueue);
         Thread fileReader = new Thread(fileReaderTask);
         fileReader.start();
 
         // Start the memory-loading thread
-        MemoryLoadingThread memLoaderTask = new MemoryLoadingThread(jobQueue, readyQueue, memoryManager, tracker);
+        MemoryLoadingThread memLoaderTask = new MemoryLoadingThread(jobQueue, readyQueue, memoryManager);
         Thread memLoader = new Thread(memLoaderTask);
         memLoader.start();
 
@@ -49,7 +49,8 @@ public class MainSimulator {
         Thread scheduler;
         switch (choice) {
             case 1:
-                scheduler = new Thread(new FCFSScheduler(readyQueue, memoryManager, tracker));
+                // Updated: FCFS now takes (ReadyQueue, ProcessTracker)
+                scheduler = new Thread(new FCFSScheduler(readyQueue, tracker));
                 break;
             case 2:
                 scheduler = new Thread(new RRScheduler(readyQueue, memoryManager, quantum, tracker));
@@ -59,7 +60,7 @@ public class MainSimulator {
                 break;
             default:
                 System.out.println("Invalid choice. Using FCFS by default.");
-                scheduler = new Thread(new FCFSScheduler(readyQueue, memoryManager, tracker));
+                scheduler = new Thread(new FCFSScheduler(readyQueue, tracker));
         }
         scheduler.start();
 
@@ -75,6 +76,8 @@ public class MainSimulator {
         // Stop other threads when done
         fileReaderTask.stopThread();
         memLoaderTask.stopThread();
+
+        input.close();
 
         System.out.println("\nSimulation completed. All processes finished.");
         System.exit(0);

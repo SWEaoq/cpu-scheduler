@@ -2,14 +2,12 @@ public class MemoryLoadingThread implements Runnable {
     private JobQueue jobQueue;
     private ReadyQueue readyQueue;
     private MemoryManager memoryManager;
-    private ProcessTracker tracker;
     private boolean running = true; // ✅ Flag to stop thread
 
-    public MemoryLoadingThread(JobQueue jobQueue, ReadyQueue readyQueue, MemoryManager memoryManager, ProcessTracker tracker) {
+    public MemoryLoadingThread(JobQueue jobQueue, ReadyQueue readyQueue, MemoryManager memoryManager) {
         this.jobQueue = jobQueue;
         this.readyQueue = readyQueue;
         this.memoryManager = memoryManager;
-        this.tracker = tracker;
     }
 
     public void stopThread() {

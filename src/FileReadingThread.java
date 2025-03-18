@@ -5,16 +5,14 @@ import java.util.Scanner;
 public class FileReadingThread implements Runnable {
     private String filePath;
     private JobQueue jobQueue;
-    private ProcessTracker tracker;
     private boolean running = true;
 
     private int lastLineRead = 0;
     private static final long READ_INTERVAL_MS = 5000;
 
-    public FileReadingThread(String filePath, JobQueue jobQueue, ProcessTracker tracker) {
+    public FileReadingThread(String filePath, JobQueue jobQueue) {
         this.filePath = filePath;
         this.jobQueue = jobQueue;
-        this.tracker = tracker;
     }
 
     public void stopThread() {
@@ -25,24 +23,19 @@ public class FileReadingThread implements Runnable {
     public void run() {
         while (running) {
             try {
-                int newJobs = countJobs(filePath) - lastLineRead;
-                if (newJobs > 0) {
-                    Scanner sc = new Scanner(new File(filePath));
-                    int lineCount = 0;
-                    while (sc.hasNextLine()) {
-                        String line = sc.nextLine().trim();
-                        if (!line.isEmpty() && lineCount >= lastLineRead) {
-                            parseAndAddJob(line);  // ✅ Now correctly references the method
-                            tracker.incrementTotalProcesses();
-                        }
-                        lineCount++;
-                    }
-                    sc.close();
-                    lastLineRead = lineCount;
+                File file = new File(filePath);
+                Scanner scanner = new Scanner(file);
+                int currentLine = 0;
+                while (scanner.hasNextLine()) {
+                    String line = scanner.nextLine();
+                    currentLine++;
+                    if (currentLine <= lastLineRead)
+                        continue;
+                    parseAndAddJob(line);
                 }
+                lastLineRead = currentLine;
+                scanner.close();
             } catch (FileNotFoundException e) {
-                System.err.println("Could not find file: " + filePath);
-            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -54,55 +47,46 @@ public class FileReadingThread implements Runnable {
         }
         System.out.println("FileReadingThread stopped.");
     }
-
-    /**
-     * ✅ Correctly defined static method to count jobs in the file.
-     */
+    
     public static int countJobs(String filePath) {
         int count = 0;
         try {
             File file = new File(filePath);
-            Scanner sc = new Scanner(file);
-            while (sc.hasNextLine()) {
-                String line = sc.nextLine().trim();
-                if (!line.isEmpty()) {
+            Scanner scanner = new Scanner(file);
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine().trim();
+                if (!line.isEmpty()) {  // Only count non-empty lines
                     count++;
                 }
             }
-            sc.close();
+            scanner.close();
         } catch (FileNotFoundException e) {
-            System.err.println("Could not find job file: " + filePath);
+            e.printStackTrace();
         }
         return count;
     }
-
-    /**
-     * ✅ Parses a job line and adds it to the job queue.
-     */
+    
     private void parseAndAddJob(String line) {
         String[] parts = line.split(";");
         if (parts.length != 2) {
-            System.err.println("Invalid line format (must contain exactly one ';'): " + line);
             return;
         }
 
         String[] subParts = parts[0].split(":");
         if (subParts.length != 3) {
-            System.err.println("Invalid job format (must contain two ':'): " + line);
             return;
         }
 
         try {
-            int pid = Integer.parseInt(subParts[0]);
-            int burstTime = Integer.parseInt(subParts[1]);
-            int priority = Integer.parseInt(subParts[2]);
-            int memReq = Integer.parseInt(parts[1]);
+            int processId = Integer.parseInt(subParts[0].trim());
+            int burstTime = Integer.parseInt(subParts[1].trim());
+            int priority = Integer.parseInt(subParts[2].trim());
+            int memoryRequired = Integer.parseInt(parts[1].trim());
 
-            PCB pcb = new PCB(pid, burstTime, priority, memReq, System.currentTimeMillis());
+            PCB pcb = new PCB(processId, burstTime, priority, memoryRequired, System.currentTimeMillis());
             jobQueue.addJob(pcb);
-            System.out.println("Added new job from file: " + pcb.toString());
         } catch (NumberFormatException e) {
-            System.err.println("Failed to parse job line: " + line + " => " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

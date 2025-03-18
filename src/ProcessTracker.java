@@ -11,10 +11,6 @@ public class ProcessTracker {
         completedProcesses++;
     }
 
-    public synchronized void incrementTotalProcesses() {
-        totalProcesses++; // ✅ Now tracks new jobs from FileReadingThread
-    }
-
     public synchronized boolean isAllProcessesFinished() {
         return completedProcesses >= totalProcesses;
     }
