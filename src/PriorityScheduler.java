@@ -37,12 +37,12 @@ public class PriorityScheduler implements Runnable {
                 highestPriorityPCB.setFinishTime((int) System.currentTimeMillis());
                 highestPriorityPCB.setState(ProcessState.TERMINATED);
 
-                int arrival = highestPriorityPCB.getArrivalTime();
-                int start = highestPriorityPCB.getStartTime();
-                int finish = highestPriorityPCB.getFinishTime();
+                long arrival = highestPriorityPCB.getArrivalTime();
+                long start = highestPriorityPCB.getStartTime();
+                long finish = highestPriorityPCB.getFinishTime();
 
-                highestPriorityPCB.setWaitingTime(start - arrival);
-                highestPriorityPCB.setTurnaroundTime(finish - arrival);
+                highestPriorityPCB.setWaitingTime((int)(start - arrival));
+                highestPriorityPCB.setTurnaroundTime((int)(finish - arrival));
 
                 // free memory
                 memoryManager.freeMemory(highestPriorityPCB.getMemoryRequired());

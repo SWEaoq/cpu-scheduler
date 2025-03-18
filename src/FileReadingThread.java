@@ -99,7 +99,7 @@ public class FileReadingThread implements Runnable {
                 burstTime,
                 priority,
                 memReq,
-                (int) System.currentTimeMillis()
+                System.currentTimeMillis()
             );
             jobQueue.addJob(pcb);
             System.out.println("Added new job from file: " + pcb.toString());

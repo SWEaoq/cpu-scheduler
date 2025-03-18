@@ -40,11 +40,11 @@ public class FCFSScheduler implements Runnable {
                     pcb.setState(ProcessState.TERMINATED);
 
                     // Calculate basic metrics
-                    int arrival = pcb.getArrivalTime();
-                    int start = pcb.getStartTime();
-                    int finish = pcb.getFinishTime();
-                    pcb.setWaitingTime(start - arrival); 
-                    pcb.setTurnaroundTime(finish - arrival);
+                    long arrival = pcb.getArrivalTime();
+                    long start = pcb.getStartTime();
+                    long finish = pcb.getFinishTime();
+                    pcb.setWaitingTime((int)(start - arrival)); 
+                    pcb.setTurnaroundTime((int)(finish - arrival));
 
                     // Free memory
                     memoryManager.freeMemory(pcb.getMemoryRequired());

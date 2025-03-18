@@ -24,11 +24,11 @@ public class PCB {
     
     // Additional info
     private ProcessState state;      // NEW, READY, RUNNING, WAITING, TERMINATED
-    private int arrivalTime;         // to track arrival times
-    private int startTime;           // time the process first got the CPU
-    private int finishTime;          // time the process finished
+    private long arrivalTime;         // to track arrival times
+    private long startTime;           // time the process first got the CPU
+    private long finishTime;          // time the process finished
 
-    public PCB(int processId, int burstTime, int priority, int memoryRequired, int arrivalTime) {
+    public PCB(int processId, int burstTime, int priority, int memoryRequired, long arrivalTime) {
         this.processId = processId;
         this.burstTime = burstTime;
         this.remainingBurstTime = burstTime; // to be decremented during scheduling
@@ -95,23 +95,23 @@ public class PCB {
         this.state = state;
     }
 
-    public int getArrivalTime() {
+    public long getArrivalTime() {
         return arrivalTime;
     }
 
-    public int getStartTime() {
+    public long getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(int startTime) {
+    public void setStartTime(long startTime) {
         this.startTime = startTime;
     }
 
-    public int getFinishTime() {
+    public long getFinishTime() {
         return finishTime;
     }
 
-    public void setFinishTime(int finishTime) {
+    public void setFinishTime(long finishTime) {
         this.finishTime = finishTime;
     }
 
