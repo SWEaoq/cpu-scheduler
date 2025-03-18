@@ -3,6 +3,7 @@ public class MemoryLoadingThread implements Runnable {
     private ReadyQueue readyQueue;
     private MemoryManager memoryManager;
     private ProcessTracker tracker;
+    private boolean running = true; // ✅ Flag to stop thread
 
     public MemoryLoadingThread(JobQueue jobQueue, ReadyQueue readyQueue, MemoryManager memoryManager, ProcessTracker tracker) {
         this.jobQueue = jobQueue;
@@ -11,9 +12,13 @@ public class MemoryLoadingThread implements Runnable {
         this.tracker = tracker;
     }
 
+    public void stopThread() {
+        running = false; // ✅ Stop when simulation is done
+    }
+
     @Override
     public void run() {
-        while (!tracker.isAllProcessesFinished()) {
+        while (running) {
             if (!jobQueue.isEmpty()) {
                 PCB pcb = jobQueue.pollJob();
                 if (pcb != null) {
@@ -21,7 +26,7 @@ public class MemoryLoadingThread implements Runnable {
                         memoryManager.allocateMemory(pcb.getMemoryRequired());
                         readyQueue.addReadyPCB(pcb);
                     } else {
-                        jobQueue.addJob(pcb);  // Not enough memory, reinsert the job
+                        jobQueue.addJob(pcb);
                     }
                 }
             }
@@ -32,7 +37,6 @@ public class MemoryLoadingThread implements Runnable {
                 e.printStackTrace();
             }
         }
-
-        System.out.println("Memory Loader finished.");
+        System.out.println("MemoryLoadingThread stopped.");
     }
 }

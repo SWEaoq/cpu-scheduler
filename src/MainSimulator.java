@@ -23,7 +23,7 @@ public class MainSimulator {
         int quantum = 0; // Only needed for Round Robin
         if (choice == 2) {
             System.out.print("Enter time quantum in ms: ");
-            quantum = input.nextInt();  // Professor can change this
+            quantum = input.nextInt();
         }
 
         // Create core components
@@ -36,11 +36,13 @@ public class MainSimulator {
         ProcessTracker tracker = new ProcessTracker(totalJobs);
 
         // Start the file-reading thread
-        Thread fileReader = new Thread(new FileReadingThread(filePath, jobQueue, tracker));
+        FileReadingThread fileReaderTask = new FileReadingThread(filePath, jobQueue, tracker);
+        Thread fileReader = new Thread(fileReaderTask);
         fileReader.start();
 
         // Start the memory-loading thread
-        Thread memLoader = new Thread(new MemoryLoadingThread(jobQueue, readyQueue, memoryManager, tracker));
+        MemoryLoadingThread memLoaderTask = new MemoryLoadingThread(jobQueue, readyQueue, memoryManager, tracker);
+        Thread memLoader = new Thread(memLoaderTask);
         memLoader.start();
 
         // Start the selected scheduler
@@ -69,6 +71,10 @@ public class MainSimulator {
                 e.printStackTrace();
             }
         }
+
+        // Stop other threads when done
+        fileReaderTask.stopThread();
+        memLoaderTask.stopThread();
 
         System.out.println("\nSimulation completed. All processes finished.");
         System.exit(0);

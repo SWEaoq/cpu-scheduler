@@ -6,6 +6,7 @@ public class FileReadingThread implements Runnable {
     private String filePath;
     private JobQueue jobQueue;
     private ProcessTracker tracker;
+    private boolean running = true;
 
     private int lastLineRead = 0;
     private static final long READ_INTERVAL_MS = 5000;
@@ -16,19 +17,23 @@ public class FileReadingThread implements Runnable {
         this.tracker = tracker;
     }
 
+    public void stopThread() {
+        running = false;
+    }
+
     @Override
     public void run() {
-        while (true) {
+        while (running) {
             try {
-                int newJobs = countJobs(filePath) - lastLineRead; // ✅ Now correctly references the method
+                int newJobs = countJobs(filePath) - lastLineRead;
                 if (newJobs > 0) {
                     Scanner sc = new Scanner(new File(filePath));
                     int lineCount = 0;
                     while (sc.hasNextLine()) {
                         String line = sc.nextLine().trim();
                         if (!line.isEmpty() && lineCount >= lastLineRead) {
-                            parseAndAddJob(line);
-                            tracker.incrementTotalProcesses(); // ✅ Track new job
+                            parseAndAddJob(line);  // ✅ Now correctly references the method
+                            tracker.incrementTotalProcesses();
                         }
                         lineCount++;
                     }
@@ -47,6 +52,7 @@ public class FileReadingThread implements Runnable {
                 e.printStackTrace();
             }
         }
+        System.out.println("FileReadingThread stopped.");
     }
 
     /**
@@ -60,7 +66,7 @@ public class FileReadingThread implements Runnable {
             while (sc.hasNextLine()) {
                 String line = sc.nextLine().trim();
                 if (!line.isEmpty()) {
-                    count++; // ✅ Count valid job lines
+                    count++;
                 }
             }
             sc.close();
@@ -71,7 +77,7 @@ public class FileReadingThread implements Runnable {
     }
 
     /**
-     * Parses and adds a job to the job queue.
+     * ✅ Parses a job line and adds it to the job queue.
      */
     private void parseAndAddJob(String line) {
         String[] parts = line.split(";");
