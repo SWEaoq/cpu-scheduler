@@ -20,8 +20,7 @@ public class MemoryLoadingThread implements Runnable {
             if (!jobQueue.isEmpty()) {
                 PCB pcb = jobQueue.pollJob();
                 if (pcb != null) {
-                    if (memoryManager.canAllocate(pcb.getMemoryRequired())) {
-                        memoryManager.allocateMemory(pcb.getMemoryRequired());
+                    if (SystemCalls.sysAllocMemory(memoryManager, pcb.getMemoryRequired())) {
                         readyQueue.addReadyPCB(pcb);
                     } else {
                         jobQueue.addJob(pcb);

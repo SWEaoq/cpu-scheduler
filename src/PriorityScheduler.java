@@ -19,7 +19,8 @@ public class PriorityScheduler implements Runnable {
         while (!tracker.isAllProcessesFinished()) {
             PCB highestPriorityPCB = getHighestPriorityPCB();
             if (highestPriorityPCB != null) {
-                highestPriorityPCB.setState(ProcessState.RUNNING);
+                // Change process state to RUNNING using simulated system call.
+                SystemCalls.sysChangeProcessState(highestPriorityPCB, ProcessState.RUNNING);
 
                 if (highestPriorityPCB.getStartTime() == -1) {
                     highestPriorityPCB.setStartTime(System.currentTimeMillis());
@@ -35,7 +36,9 @@ public class PriorityScheduler implements Runnable {
 
                 highestPriorityPCB.setRemainingBurstTime(0);
                 highestPriorityPCB.setFinishTime(System.currentTimeMillis());
-                highestPriorityPCB.setState(ProcessState.TERMINATED);
+
+                // Change process state to TERMINATED using simulated system call.
+                SystemCalls.sysChangeProcessState(highestPriorityPCB, ProcessState.TERMINATED);
 
                 long arrival = highestPriorityPCB.getArrivalTime();
                 long start = highestPriorityPCB.getStartTime();
@@ -44,9 +47,9 @@ public class PriorityScheduler implements Runnable {
                 highestPriorityPCB.setWaitingTime((int) (start - arrival));
                 highestPriorityPCB.setTurnaroundTime((int) (finish - arrival));
 
-                memoryManager.freeMemory(highestPriorityPCB.getMemoryRequired());
-
-                tracker.processFinished(); // Track completion
+                // Free memory and record process completion via simulated system calls.
+                SystemCalls.sysFreeMemory(memoryManager, highestPriorityPCB.getMemoryRequired());
+                SystemCalls.sysProcessFinished(tracker, highestPriorityPCB);
 
                 System.out.println("PRIORITY: Process " + highestPriorityPCB.getProcessId() 
                                    + " (priority=" + highestPriorityPCB.getPriority() + ") finished.");

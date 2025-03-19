@@ -35,7 +35,7 @@ public class MainSimulator {
         int totalJobs = FileReadingThread.countJobs(filePath);
         ProcessTracker tracker = new ProcessTracker(totalJobs);
 
-        // Start the file-reading thread (note: tracker removed from constructor)
+        // Start the file-reading thread (tracker not used in this constructor)
         FileReadingThread fileReaderTask = new FileReadingThread(filePath, jobQueue);
         Thread fileReader = new Thread(fileReaderTask);
         fileReader.start();
@@ -49,7 +49,6 @@ public class MainSimulator {
         Thread scheduler;
         switch (choice) {
             case 1:
-                // Updated: FCFS now takes (ReadyQueue, ProcessTracker)
                 scheduler = new Thread(new FCFSScheduler(readyQueue, tracker));
                 break;
             case 2:
@@ -76,10 +75,13 @@ public class MainSimulator {
         // Stop other threads when done
         fileReaderTask.stopThread();
         memLoaderTask.stopThread();
-
         input.close();
 
+        // Print final performance metrics
         System.out.println("\nSimulation completed. All processes finished.");
+        System.out.println("Average Waiting Time: " + tracker.getAverageWaitingTime() + " ms");
+        System.out.println("Average Turnaround Time: " + tracker.getAverageTurnaroundTime() + " ms");
+
         System.exit(0);
     }
 }
