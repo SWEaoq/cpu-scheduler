@@ -1,6 +1,7 @@
 import java.util.Scanner;
 
 public class MainSimulator {
+
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
 
@@ -17,35 +18,55 @@ public class MainSimulator {
         System.out.println("[1] FCFS");
         System.out.println("[2] Round Robin (Configurable Quantum)");
         System.out.println("[3] Priority Scheduling");
+        System.out.println("[4] Run All Algorithms");
         System.out.print("Enter choice: ");
         int choice = input.nextInt();
 
-        int quantum = 0; // Only needed for Round Robin
-        if (choice == 2) {
-            System.out.print("Enter time quantum in ms: ");
-            quantum = input.nextInt();
+        if (choice == 4) {
+            // For Round Robin, ask for quantum too.
+            System.out.print("Enter time quantum in ms (for RR): ");
+            int quantum = input.nextInt();
+            
+            System.out.println("\n--- Running FCFS ---");
+            runFCFS(filePath, totalMemory);
+
+            System.out.println("\n--- Running Round Robin ---");
+            runRR(filePath, totalMemory, quantum);
+
+            System.out.println("\n--- Running Priority Scheduling ---");
+            runPriority(filePath, totalMemory);
+        } else {
+            // Single algorithm run (existing code)
+            int quantum = 0;
+            if (choice == 2) {
+                System.out.print("Enter time quantum in ms: ");
+                quantum = input.nextInt();
+            }
+            runSimulation(choice, filePath, totalMemory, quantum);
         }
 
+        input.close();
+        System.exit(0);
+    }
+
+    // Helper method to run a single simulation based on choice 1-3.
+    private static void runSimulation(int choice, String filePath, int totalMemory, int quantum) {
         // Create core components
         MemoryManager memoryManager = new MemoryManager(totalMemory);
         JobQueue jobQueue = new JobQueue();
         ReadyQueue readyQueue = new ReadyQueue();
 
-        // Track the total number of jobs
         int totalJobs = FileReadingThread.countJobs(filePath);
         ProcessTracker tracker = new ProcessTracker(totalJobs);
 
-        // Start the file-reading thread (tracker not used in this constructor)
         FileReadingThread fileReaderTask = new FileReadingThread(filePath, jobQueue);
         Thread fileReader = new Thread(fileReaderTask);
         fileReader.start();
 
-        // Start the memory-loading thread
         MemoryLoadingThread memLoaderTask = new MemoryLoadingThread(jobQueue, readyQueue, memoryManager);
         Thread memLoader = new Thread(memLoaderTask);
         memLoader.start();
 
-        // Start the selected scheduler
         Thread scheduler;
         switch (choice) {
             case 1:
@@ -63,25 +84,33 @@ public class MainSimulator {
         }
         scheduler.start();
 
-        // Wait for all processes to finish
+        // Wait for the simulation to finish.
         while (!tracker.isAllProcessesFinished()) {
             try {
-                Thread.sleep(100);  // Check every 100ms
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-
-        // Stop other threads when done
         fileReaderTask.stopThread();
         memLoaderTask.stopThread();
-        input.close();
 
-        // Print final performance metrics
+        // Print performance metrics.
         System.out.println("\nSimulation completed. All processes finished.");
         System.out.println("Average Waiting Time: " + tracker.getAverageWaitingTime() + " ms");
         System.out.println("Average Turnaround Time: " + tracker.getAverageTurnaroundTime() + " ms");
+    }
 
-        System.exit(0);
+    // Each algorithm simulation reinitializes the components so each run is independent.
+    private static void runFCFS(String filePath, int totalMemory) {
+        runSimulation(1, filePath, totalMemory, 0);
+    }
+
+    private static void runRR(String filePath, int totalMemory, int quantum) {
+        runSimulation(2, filePath, totalMemory, quantum);
+    }
+
+    private static void runPriority(String filePath, int totalMemory) {
+        runSimulation(3, filePath, totalMemory, 0);
     }
 }
