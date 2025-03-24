@@ -7,6 +7,8 @@ public class PriorityScheduler implements Runnable {
     private ProcessTracker tracker;
     
     private static final int TIME_UNIT_MS = 100; 
+    private static final int AGING_INTERVAL_MS = 200; // every 200ms, effective priority increases by 1
+    private static final int STARVATION_THRESHOLD_MS = 2000; // threshold to consider a process starved
 
     public PriorityScheduler(ReadyQueue readyQueue, MemoryManager memoryManager, ProcessTracker tracker) {
         this.readyQueue = readyQueue;
@@ -17,16 +19,24 @@ public class PriorityScheduler implements Runnable {
     @Override
     public void run() {
         while (!tracker.isAllProcessesFinished()) {
-            PCB highestPriorityPCB = getHighestPriorityPCB();
-            if (highestPriorityPCB != null) {
-                SystemCalls.sysChangeProcessState(highestPriorityPCB, ProcessState.RUNNING);
+            PCB pcb = getHighestPriorityPCB();
+            if (pcb != null) {
+                long currentTime = System.currentTimeMillis();
+                long waitingTime = currentTime - pcb.getArrivalTime();
+                // If waiting time exceeds threshold, log potential starvation
+                if (waitingTime >= STARVATION_THRESHOLD_MS) {
+                    System.out.println("STARVATION ALERT: Process " + pcb.getProcessId() 
+                                       + " has been waiting for " + waitingTime + " ms.");
+                }
+                
+                SystemCalls.sysChangeProcessState(pcb, ProcessState.RUNNING);
 
-                if (highestPriorityPCB.getStartTime() == -1) {
-                    highestPriorityPCB.setStartTime(System.currentTimeMillis());
+                if (pcb.getStartTime() == -1) {
+                    pcb.setStartTime(currentTime);
                 }
 
-                long startTime = highestPriorityPCB.getStartTime();
-                int burstTime = highestPriorityPCB.getRemainingBurstTime();
+                long startTime = pcb.getStartTime();
+                int burstTime = pcb.getRemainingBurstTime();
 
                 try {
                     Thread.sleep(burstTime * TIME_UNIT_MS);
@@ -34,22 +44,22 @@ public class PriorityScheduler implements Runnable {
                     e.printStackTrace();
                 }
 
-                highestPriorityPCB.setRemainingBurstTime(0);
-                highestPriorityPCB.setFinishTime(System.currentTimeMillis());
-                long finishTime = highestPriorityPCB.getFinishTime();
+                pcb.setRemainingBurstTime(0);
+                pcb.setFinishTime(System.currentTimeMillis());
+                long finishTime = pcb.getFinishTime();
 
-                highestPriorityPCB.setWaitingTime((int) (startTime - highestPriorityPCB.getArrivalTime()));
-                highestPriorityPCB.setTurnaroundTime((int) (finishTime - highestPriorityPCB.getArrivalTime()));
+                pcb.setWaitingTime((int) (startTime - pcb.getArrivalTime()));
+                pcb.setTurnaroundTime((int) (finishTime - pcb.getArrivalTime()));
 
-                SystemCalls.sysChangeProcessState(highestPriorityPCB, ProcessState.TERMINATED);
-                SystemCalls.sysFreeMemory(memoryManager, highestPriorityPCB.getMemoryRequired());
-                SystemCalls.sysProcessFinished(tracker, highestPriorityPCB);
+                SystemCalls.sysChangeProcessState(pcb, ProcessState.TERMINATED);
+                SystemCalls.sysFreeMemory(memoryManager, pcb.getMemoryRequired());
+                SystemCalls.sysProcessFinished(tracker, pcb);
 
                 // Record full process execution in Gantt chart.
-                tracker.addGanttChartEntry(new GanttChartEntry(highestPriorityPCB.getProcessId(), startTime, finishTime));
+                tracker.addGanttChartEntry(new GanttChartEntry(pcb.getProcessId(), startTime, finishTime));
 
-                System.out.println("PRIORITY: Process " + highestPriorityPCB.getProcessId() 
-                                   + " (priority=" + highestPriorityPCB.getPriority() + ") finished.");
+                System.out.println("PRIORITY: Process " + pcb.getProcessId() 
+                                   + " (base priority=" + pcb.getPriority() + ") finished.");
             }
             
             try {
@@ -68,17 +78,21 @@ public class PriorityScheduler implements Runnable {
         }
         List<PCB> allPCBs = new ArrayList<>();
         PCB best = null;
+        long currentTime = System.currentTimeMillis();
         
         while (!readyQueue.isEmpty()) {
             PCB pcb = readyQueue.pollReadyPCB();
-            // Corrected comparison: now selecting the process with the highest numeric priority.
-            if (best == null || pcb.getPriority() > best.getPriority()) {
-                if (best != null) {
-                    allPCBs.add(best);
-                }
+            int effectivePriority = pcb.getPriority() + (int)((currentTime - pcb.getArrivalTime()) / AGING_INTERVAL_MS);
+            if (best == null) {
                 best = pcb;
             } else {
-                allPCBs.add(pcb);
+                int bestEffectivePriority = best.getPriority() + (int)((currentTime - best.getArrivalTime()) / AGING_INTERVAL_MS);
+                if (effectivePriority > bestEffectivePriority) {
+                    allPCBs.add(best);
+                    best = pcb;
+                } else {
+                    allPCBs.add(pcb);
+                }
             }
         }
         for (PCB p : allPCBs) {
