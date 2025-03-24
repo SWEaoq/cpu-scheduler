@@ -14,18 +14,15 @@ public class ProcessTracker {
         this.ganttChartEntries = new ArrayList<>();
     }
 
-    // Called when a process finishes its execution.
     public synchronized void processFinished(PCB pcb) {
         finishedProcesses.add(pcb);
         completedProcesses++;
     }
 
-    // Returns true when all processes have been completed.
     public synchronized boolean isAllProcessesFinished() {
         return completedProcesses >= totalProcesses;
     }
     
-    // Calculate average waiting time among finished processes.
     public double getAverageWaitingTime() {
         double sum = 0;
         for (PCB pcb : finishedProcesses) {
@@ -34,7 +31,6 @@ public class ProcessTracker {
         return finishedProcesses.size() > 0 ? sum / finishedProcesses.size() : 0;
     }
     
-    // Calculate average turnaround time among finished processes.
     public double getAverageTurnaroundTime() {
         double sum = 0;
         for (PCB pcb : finishedProcesses) {
@@ -43,7 +39,6 @@ public class ProcessTracker {
         return finishedProcesses.size() > 0 ? sum / finishedProcesses.size() : 0;
     }
     
-    // Add a Gantt chart entry.
     public synchronized void addGanttChartEntry(GanttChartEntry entry) {
         ganttChartEntries.add(entry);
     }

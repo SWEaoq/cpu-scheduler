@@ -14,7 +14,6 @@ public class FCFSScheduler implements Runnable {
             if (!readyQueue.isEmpty()) {
                 PCB pcb = readyQueue.pollReadyPCB();
                 if (pcb != null) {
-                    // Set process to RUNNING and initialize start time if needed.
                     pcb.setState(ProcessState.RUNNING);
                     if (pcb.getStartTime() == -1) {
                         pcb.setStartTime(System.currentTimeMillis());
@@ -28,7 +27,6 @@ public class FCFSScheduler implements Runnable {
                         e.printStackTrace();
                     }
 
-                    // Process is finished: update its metrics.
                     pcb.setRemainingBurstTime(0);
                     pcb.setFinishTime(System.currentTimeMillis());
                     long finishTime = pcb.getFinishTime();
@@ -36,10 +34,7 @@ public class FCFSScheduler implements Runnable {
                     pcb.setWaitingTime((int) (pcb.getStartTime() - pcb.getArrivalTime()));
                     pcb.setTurnaroundTime((int) (finishTime - pcb.getArrivalTime()));
 
-                    // Change state to TERMINATED using system call.
                     SystemCalls.sysChangeProcessState(pcb, ProcessState.TERMINATED);
-
-                    // Record Gantt chart entry.
                     tracker.addGanttChartEntry(new GanttChartEntry(pcb.getProcessId(), startTime, finishTime));
 
                     System.out.println("FCFS: Process " + pcb.getProcessId() + " finished.");
@@ -47,7 +42,7 @@ public class FCFSScheduler implements Runnable {
                 }
             } else {
                 try {
-                    Thread.sleep(100); // Wait when there's no job ready
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

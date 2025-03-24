@@ -5,7 +5,7 @@ public class PriorityScheduler implements Runnable {
     private ReadyQueue readyQueue;
     private MemoryManager memoryManager;
     private ProcessTracker tracker;
-
+    
     private static final int TIME_UNIT_MS = 100; 
 
     public PriorityScheduler(ReadyQueue readyQueue, MemoryManager memoryManager, ProcessTracker tracker) {
@@ -13,7 +13,7 @@ public class PriorityScheduler implements Runnable {
         this.memoryManager = memoryManager;
         this.tracker = tracker;
     }
-
+    
     @Override
     public void run() {
         while (!tracker.isAllProcessesFinished()) {
@@ -51,27 +51,28 @@ public class PriorityScheduler implements Runnable {
                 System.out.println("PRIORITY: Process " + highestPriorityPCB.getProcessId() 
                                    + " (priority=" + highestPriorityPCB.getPriority() + ") finished.");
             }
-
+            
             try {
                 Thread.sleep(50); // Avoid busy-waiting
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-
+        
         System.out.println("Priority Scheduler finished.");
     }
-
+    
     private PCB getHighestPriorityPCB() {
         if (readyQueue.isEmpty()) {
             return null;
         }
         List<PCB> allPCBs = new ArrayList<>();
         PCB best = null;
-
+        
         while (!readyQueue.isEmpty()) {
             PCB pcb = readyQueue.pollReadyPCB();
-            if (best == null || pcb.getPriority() < best.getPriority()) {
+            // Corrected comparison: now selecting the process with the highest numeric priority.
+            if (best == null || pcb.getPriority() > best.getPriority()) {
                 if (best != null) {
                     allPCBs.add(best);
                 }

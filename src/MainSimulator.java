@@ -92,15 +92,19 @@ public class MainSimulator {
         System.out.println("Average Waiting Time: " + tracker.getAverageWaitingTime() + " ms");
         System.out.println("Average Turnaround Time: " + tracker.getAverageTurnaroundTime() + " ms");
 
-        // Enhanced Output: Gantt Chart Display
-        System.out.println("\nGantt Chart:");
-        System.out.println("-------------------------------------------------");
-        System.out.println("| Start Time (ms) | End Time (ms) | Process ID |");
-        System.out.println("-------------------------------------------------");
-        for (GanttChartEntry entry : tracker.getGanttChartEntries()) {
-            System.out.printf("| %-15d | %-13d | %-10d |\n", entry.getStartTime(), entry.getEndTime(), entry.getProcessId());
+        if (!tracker.getGanttChartEntries().isEmpty()) {
+            long simulationStart = tracker.getGanttChartEntries().get(0).getStartTime();
+            System.out.println("\nGantt Chart (relative times in ms):");
+            System.out.println("-------------------------------------------------");
+            System.out.println("| Start (ms) | End (ms)  | Process ID |");
+            System.out.println("-------------------------------------------------");
+            for (GanttChartEntry entry : tracker.getGanttChartEntries()) {
+                long relativeStart = entry.getStartTime() - simulationStart;
+                long relativeEnd = entry.getEndTime() - simulationStart;
+                System.out.printf("| %-10d | %-9d | %-10d |\n", relativeStart, relativeEnd, entry.getProcessId());
+            }
+            System.out.println("-------------------------------------------------");
         }
-        System.out.println("-------------------------------------------------");
     }
 
     private static void runFCFS(String filePath, int totalMemory) {
