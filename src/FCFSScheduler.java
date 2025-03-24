@@ -19,7 +19,8 @@ public class FCFSScheduler implements Runnable {
                     if (pcb.getStartTime() == -1) {
                         pcb.setStartTime(System.currentTimeMillis());
                     }
-
+                    
+                    long startTime = pcb.getStartTime();
                     int remaining = pcb.getRemainingBurstTime();
                     try {
                         Thread.sleep(remaining * TIME_UNIT_MS);
@@ -30,23 +31,23 @@ public class FCFSScheduler implements Runnable {
                     // Process is finished: update its metrics.
                     pcb.setRemainingBurstTime(0);
                     pcb.setFinishTime(System.currentTimeMillis());
+                    long finishTime = pcb.getFinishTime();
 
-                    long arrival = pcb.getArrivalTime();
-                    long start = pcb.getStartTime();
-                    long finish = pcb.getFinishTime();
-                    pcb.setWaitingTime((int) (start - arrival));
-                    pcb.setTurnaroundTime((int) (finish - arrival));
+                    pcb.setWaitingTime((int) (pcb.getStartTime() - pcb.getArrivalTime()));
+                    pcb.setTurnaroundTime((int) (finishTime - pcb.getArrivalTime()));
 
                     // Change state to TERMINATED using system call.
                     SystemCalls.sysChangeProcessState(pcb, ProcessState.TERMINATED);
-                    System.out.println("FCFS: Process " + pcb.getProcessId() + " finished.");
 
-                    // Record process completion by passing the finished PCB.
+                    // Record Gantt chart entry.
+                    tracker.addGanttChartEntry(new GanttChartEntry(pcb.getProcessId(), startTime, finishTime));
+
+                    System.out.println("FCFS: Process " + pcb.getProcessId() + " finished.");
                     SystemCalls.sysProcessFinished(tracker, pcb);
                 }
             } else {
                 try {
-                    Thread.sleep(100); // Wait a bit when there's no job ready
+                    Thread.sleep(100); // Wait when there's no job ready
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

@@ -5,11 +5,13 @@ public class ProcessTracker {
     private int totalProcesses;
     private int completedProcesses;
     private List<PCB> finishedProcesses;
+    private List<GanttChartEntry> ganttChartEntries;
 
     public ProcessTracker(int totalProcesses) {
         this.totalProcesses = totalProcesses;
         this.completedProcesses = 0;
         this.finishedProcesses = new ArrayList<>();
+        this.ganttChartEntries = new ArrayList<>();
     }
 
     // Called when a process finishes its execution.
@@ -39,5 +41,14 @@ public class ProcessTracker {
             sum += pcb.getTurnaroundTime();
         }
         return finishedProcesses.size() > 0 ? sum / finishedProcesses.size() : 0;
+    }
+    
+    // Add a Gantt chart entry.
+    public synchronized void addGanttChartEntry(GanttChartEntry entry) {
+        ganttChartEntries.add(entry);
+    }
+    
+    public synchronized List<GanttChartEntry> getGanttChartEntries() {
+        return ganttChartEntries;
     }
 }

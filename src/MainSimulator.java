@@ -5,15 +5,13 @@ public class MainSimulator {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
 
-        // Get job file and memory size
         System.out.print("Enter the path to your job file (e.g., job.txt): ");
         String filePath = input.nextLine();
 
         System.out.print("Enter total memory (e.g., 2048): ");
         int totalMemory = input.nextInt();
-        input.nextLine(); // Consume leftover newline
+        input.nextLine();
 
-        // Scheduler selection
         System.out.println("\nChoose a scheduling algorithm:");
         System.out.println("[1] FCFS");
         System.out.println("[2] Round Robin (Configurable Quantum)");
@@ -23,7 +21,6 @@ public class MainSimulator {
         int choice = input.nextInt();
 
         if (choice == 4) {
-            // For Round Robin, ask for quantum too.
             System.out.print("Enter time quantum in ms (for RR): ");
             int quantum = input.nextInt();
             
@@ -36,7 +33,6 @@ public class MainSimulator {
             System.out.println("\n--- Running Priority Scheduling ---");
             runPriority(filePath, totalMemory);
         } else {
-            // Single algorithm run (existing code)
             int quantum = 0;
             if (choice == 2) {
                 System.out.print("Enter time quantum in ms: ");
@@ -49,9 +45,7 @@ public class MainSimulator {
         System.exit(0);
     }
 
-    // Helper method to run a single simulation based on choice 1-3.
     private static void runSimulation(int choice, String filePath, int totalMemory, int quantum) {
-        // Create core components
         MemoryManager memoryManager = new MemoryManager(totalMemory);
         JobQueue jobQueue = new JobQueue();
         ReadyQueue readyQueue = new ReadyQueue();
@@ -84,7 +78,6 @@ public class MainSimulator {
         }
         scheduler.start();
 
-        // Wait for the simulation to finish.
         while (!tracker.isAllProcessesFinished()) {
             try {
                 Thread.sleep(100);
@@ -95,13 +88,21 @@ public class MainSimulator {
         fileReaderTask.stopThread();
         memLoaderTask.stopThread();
 
-        // Print performance metrics.
         System.out.println("\nSimulation completed. All processes finished.");
         System.out.println("Average Waiting Time: " + tracker.getAverageWaitingTime() + " ms");
         System.out.println("Average Turnaround Time: " + tracker.getAverageTurnaroundTime() + " ms");
+
+        // Enhanced Output: Gantt Chart Display
+        System.out.println("\nGantt Chart:");
+        System.out.println("-------------------------------------------------");
+        System.out.println("| Start Time (ms) | End Time (ms) | Process ID |");
+        System.out.println("-------------------------------------------------");
+        for (GanttChartEntry entry : tracker.getGanttChartEntries()) {
+            System.out.printf("| %-15d | %-13d | %-10d |\n", entry.getStartTime(), entry.getEndTime(), entry.getProcessId());
+        }
+        System.out.println("-------------------------------------------------");
     }
 
-    // Each algorithm simulation reinitializes the components so each run is independent.
     private static void runFCFS(String filePath, int totalMemory) {
         runSimulation(1, filePath, totalMemory, 0);
     }

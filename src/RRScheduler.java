@@ -25,11 +25,16 @@ public class RRScheduler implements Runnable {
                     }
 
                     int slice = Math.min(pcb.getRemainingBurstTime(), timeQuantum);
+                    long sliceStart = System.currentTimeMillis();
                     try {
                         Thread.sleep(slice * TIME_UNIT_MS);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    long sliceEnd = System.currentTimeMillis();
+
+                    // Record execution slice
+                    tracker.addGanttChartEntry(new GanttChartEntry(pcb.getProcessId(), sliceStart, sliceEnd));
 
                     pcb.setRemainingBurstTime(pcb.getRemainingBurstTime() - slice);
 
@@ -41,19 +46,10 @@ public class RRScheduler implements Runnable {
                         // Waiting time = Turnaround time - original burst time
                         pcb.setWaitingTime((int) (finish - arrival - pcb.getBurstTime()));
 
-                        // Debug logging – add these lines
-                        System.out.println("Process " + pcb.getProcessId() + 
-                        ": arrival=" + arrival + 
-                        ", start=" + pcb.getStartTime() + 
-                        ", finish=" + finish + 
-                        ", original burst=" + pcb.getBurstTime() +
-                        ", waiting=" + pcb.getWaitingTime() +
-                        ", turnaround=" + pcb.getTurnaroundTime());
-
+                        System.out.println("RR: Process " + pcb.getProcessId() + " finished.");
                         SystemCalls.sysChangeProcessState(pcb, ProcessState.TERMINATED);
                         SystemCalls.sysFreeMemory(memoryManager, pcb.getMemoryRequired());
                         SystemCalls.sysProcessFinished(tracker, pcb);
-                        System.out.println("RR: Process " + pcb.getProcessId() + " finished.");
                     } else {
                         pcb.setState(ProcessState.READY);
                         readyQueue.addReadyPCB(pcb);
