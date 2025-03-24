@@ -18,6 +18,15 @@ public class PriorityScheduler implements Runnable {
     
     @Override
     public void run() {
+        // Wait for all jobs to be loaded
+        while (!tracker.isAllProcessesFinished() && !readyQueue.isEmpty()) {
+            try {
+                Thread.sleep(100); // Wait for jobs to be loaded
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         while (!tracker.isAllProcessesFinished()) {
             PCB pcb = getHighestPriorityPCB();
             if (pcb != null) {
