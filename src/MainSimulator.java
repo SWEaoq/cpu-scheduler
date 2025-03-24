@@ -45,7 +45,7 @@ public class MainSimulator {
         System.exit(0);
     }
 
-    private static void runSimulation(int choice, String filePath, int totalMemory, int quantum) {
+    public static void runSimulation(int choice, String filePath, int totalMemory, int quantum) {
         MemoryManager memoryManager = new MemoryManager(totalMemory);
         JobQueue jobQueue = new JobQueue();
         ReadyQueue readyQueue = new ReadyQueue();
