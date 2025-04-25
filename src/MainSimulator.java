@@ -64,7 +64,7 @@ public class MainSimulator {
         Thread scheduler;
         switch (choice) {
             case 1:
-                scheduler = new Thread(new FCFSScheduler(readyQueue, tracker));
+                scheduler = new Thread(new FCFSScheduler(readyQueue, tracker, memoryManager)); // Updated
                 break;
             case 2:
                 scheduler = new Thread(new RRScheduler(readyQueue, memoryManager, quantum, tracker));
@@ -74,7 +74,7 @@ public class MainSimulator {
                 break;
             default:
                 System.out.println("Invalid choice. Using FCFS by default.");
-                scheduler = new Thread(new FCFSScheduler(readyQueue, tracker));
+                scheduler = new Thread(new FCFSScheduler(readyQueue, tracker, memoryManager)); // Updated
         }
         scheduler.start();
 
@@ -89,6 +89,22 @@ public class MainSimulator {
         memLoaderTask.stopThread();
 
         System.out.println("\nSimulation completed. All processes finished.");
+        
+        // Add individual process statistics
+        System.out.println("\nIndividual Process Statistics:");
+        System.out.println("-------------------------------------------------------");
+        System.out.println("| Process ID | Waiting Time (ms) | Turnaround Time (ms) |");
+        System.out.println("-------------------------------------------------------");
+        for (PCB pcb : tracker.getFinishedProcesses()) {
+            System.out.printf("| %-10d | %-16d | %-20d |\n", 
+                             pcb.getProcessId(), 
+                             pcb.getWaitingTime(), 
+                             pcb.getTurnaroundTime());
+        }
+        System.out.println("-------------------------------------------------------");
+        
+        // Show averages as before
+        System.out.println("\nAverage Statistics:");
         System.out.println("Average Waiting Time: " + tracker.getAverageWaitingTime() + " ms");
         System.out.println("Average Turnaround Time: " + tracker.getAverageTurnaroundTime() + " ms");
 

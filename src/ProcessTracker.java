@@ -46,4 +46,8 @@ public class ProcessTracker {
     public synchronized List<GanttChartEntry> getGanttChartEntries() {
         return ganttChartEntries;
     }
+
+    public synchronized List<PCB> getFinishedProcesses() {
+        return new ArrayList<>(finishedProcesses);  // Return a copy to avoid concurrent modification issues
+    }
 }

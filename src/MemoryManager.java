@@ -25,4 +25,8 @@ public class MemoryManager {
     public synchronized int getUsedMemory() {
         return usedMemory;
     }
+
+    public synchronized int getTotalMemory() {
+        return totalMemory;
+    }
 }

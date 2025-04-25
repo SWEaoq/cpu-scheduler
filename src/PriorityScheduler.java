@@ -85,28 +85,41 @@ public class PriorityScheduler implements Runnable {
         if (readyQueue.isEmpty()) {
             return null;
         }
+        
         List<PCB> allPCBs = new ArrayList<>();
-        PCB best = null;
+        PCB highest = null;
+        int highestEffectivePriority = Integer.MIN_VALUE;
         long currentTime = System.currentTimeMillis();
         
+        // First, move all processes to our temporary list
         while (!readyQueue.isEmpty()) {
-            PCB pcb = readyQueue.pollReadyPCB();
-            int effectivePriority = pcb.getPriority() + (int)((currentTime - pcb.getArrivalTime()) / AGING_INTERVAL_MS);
-            if (best == null) {
-                best = pcb;
-            } else {
-                int bestEffectivePriority = best.getPriority() + (int)((currentTime - best.getArrivalTime()) / AGING_INTERVAL_MS);
-                if (effectivePriority > bestEffectivePriority) {
-                    allPCBs.add(best);
-                    best = pcb;
-                } else {
-                    allPCBs.add(pcb);
-                }
+            allPCBs.add(readyQueue.pollReadyPCB());
+        }
+        
+        // Find the highest priority process
+        for (PCB pcb : allPCBs) {
+            int effectivePriority = pcb.getPriority() + 
+                (int)((currentTime - pcb.getArrivalTime()) / AGING_INTERVAL_MS);
+            
+            // Check for starvation
+            if ((currentTime - pcb.getArrivalTime()) >= STARVATION_THRESHOLD_MS) {
+                System.out.println("STARVATION ALERT: Process " + pcb.getProcessId() 
+                    + " has been waiting for " + (currentTime - pcb.getArrivalTime()) + " ms.");
+            }
+            
+            if (highest == null || effectivePriority > highestEffectivePriority) {
+                highest = pcb;
+                highestEffectivePriority = effectivePriority;
             }
         }
-        for (PCB p : allPCBs) {
-            readyQueue.addReadyPCB(p);
+        
+        // Return all except the highest back to ready queue
+        for (PCB pcb : allPCBs) {
+            if (pcb != highest) {
+                readyQueue.addReadyPCB(pcb);
+            }
         }
-        return best;
+        
+        return highest;
     }
 }

@@ -20,9 +20,24 @@ public class MemoryLoadingThread implements Runnable {
             if (!jobQueue.isEmpty()) {
                 PCB pcb = jobQueue.pollJob();
                 if (pcb != null) {
+                    // Check if process is too large for memory
+                    if (pcb.getMemoryRequired() > memoryManager.getTotalMemory()) {
+                        System.err.println("ERROR: Process " + pcb.getProcessId() + 
+                                          " requires " + pcb.getMemoryRequired() + 
+                                          "MB which exceeds total memory capacity (" + 
+                                          memoryManager.getTotalMemory() + "MB). Process skipped.");
+                        // Skip this process - don't add it back to the queue
+                        continue;
+                    }
+                    
                     if (SystemCalls.sysAllocMemory(memoryManager, pcb.getMemoryRequired())) {
                         readyQueue.addReadyPCB(pcb);
+                        System.out.println("Process " + pcb.getProcessId() + 
+                                          " loaded into memory (using " + pcb.getMemoryRequired() + 
+                                          "MB, total used: " + memoryManager.getUsedMemory() + 
+                                          "MB of " + memoryManager.getTotalMemory() + "MB)");
                     } else {
+                        // Put back in queue and try again later
                         jobQueue.addJob(pcb);
                     }
                 }

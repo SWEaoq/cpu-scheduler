@@ -2,10 +2,18 @@ public class FCFSScheduler implements Runnable {
     private ReadyQueue readyQueue;
     private ProcessTracker tracker;
     private static final int TIME_UNIT_MS = 100;
+    private MemoryManager memoryManager; // Add this field
 
     public FCFSScheduler(ReadyQueue readyQueue, ProcessTracker tracker) {
         this.readyQueue = readyQueue;
         this.tracker = tracker;
+    }
+
+    // Add a constructor that accepts a memory manager
+    public FCFSScheduler(ReadyQueue readyQueue, ProcessTracker tracker, MemoryManager memoryManager) {
+        this.readyQueue = readyQueue;
+        this.tracker = tracker;
+        this.memoryManager = memoryManager;
     }
 
     @Override
@@ -36,6 +44,11 @@ public class FCFSScheduler implements Runnable {
 
                     SystemCalls.sysChangeProcessState(pcb, ProcessState.TERMINATED);
                     tracker.addGanttChartEntry(new GanttChartEntry(pcb.getProcessId(), startTime, finishTime));
+
+                    // Add this line to free memory
+                    if (memoryManager != null) {
+                        SystemCalls.sysFreeMemory(memoryManager, pcb.getMemoryRequired());
+                    }
 
                     System.out.println("FCFS: Process " + pcb.getProcessId() + " finished.");
                     SystemCalls.sysProcessFinished(tracker, pcb);
