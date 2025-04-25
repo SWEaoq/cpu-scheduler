@@ -50,13 +50,14 @@ Example:
 
 ## How to Run
 
-1. **Compile the Project**:
-   Use any Java IDE (e.g., IntelliJ, Eclipse) or the command line:
+1. **Compile the Project**:  
+   Use the following command to compile all Java files into a bin folder:
    ```bash
    javac -d bin src/*.java
    ```
 
-2. **Run the Simulator**:
+2. **Run the Simulator**:  
+   Execute the main class from the bin folder:
    ```bash
    java -cp bin MainSimulator
    ```
@@ -72,6 +73,25 @@ Example:
 
 4. **For Round Robin**:
    Enter the time quantum in milliseconds.
+
+4. **Using VS Code**:
+   If you run your program directly from VS Code, ensure your launch configuration sets the compiled folder as the classpath.
+   You can create or update the file `.vscode/launch.json` with:
+   {
+       "version": "0.2.0",
+       "configurations": [
+           {
+               "type": "java",
+               "name": "Launch MainSimulator",
+               "request": "launch",
+               "mainClass": "MainSimulator",
+               "projectName": "cpu-scheduler",
+               "classpath": [
+                   "${workspaceFolder}/bin"
+               ]
+           }
+       ]
+   }
 
 ## Output
 
