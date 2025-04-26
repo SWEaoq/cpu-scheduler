@@ -8,9 +8,18 @@ public class MainSimulator {
         System.out.print("Enter the path to your job file (e.g., job.txt): ");
         String filePath = input.nextLine();
 
-        System.out.print("Enter total memory (e.g., 2048): ");
-        int totalMemory = input.nextInt();
-        input.nextLine();
+        int totalMemory = 0;
+        boolean validInput = false;
+        while (!validInput) {
+            System.out.print("Enter total memory (e.g., 2048): ");
+            try {
+                totalMemory = input.nextInt();
+                validInput = true;
+            } catch (java.util.InputMismatchException e) {
+                System.out.println("Error: Please enter a valid number");
+                input.nextLine(); // Clear the invalid input
+            }
+        }
 
         System.out.println("\nChoose a scheduling algorithm:");
         System.out.println("[1] FCFS");
