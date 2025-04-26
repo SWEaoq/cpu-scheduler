@@ -18,7 +18,7 @@ public class MemoryManager {
     public synchronized void freeMemory(int memSize) {
         usedMemory -= memSize;
         if (usedMemory < 0) {
-            usedMemory = 0; // safety check
+            usedMemory = 0;
         }
     }
 

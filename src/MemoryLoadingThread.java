@@ -2,7 +2,7 @@ public class MemoryLoadingThread implements Runnable {
     private JobQueue jobQueue;
     private ReadyQueue readyQueue;
     private MemoryManager memoryManager;
-    private boolean running = true; // ✅ Flag to stop thread
+    private boolean running = true;
 
     public MemoryLoadingThread(JobQueue jobQueue, ReadyQueue readyQueue, MemoryManager memoryManager) {
         this.jobQueue = jobQueue;
@@ -11,7 +11,7 @@ public class MemoryLoadingThread implements Runnable {
     }
 
     public void stopThread() {
-        running = false; // ✅ Stop when simulation is done
+        running = false;
     }
 
     @Override
@@ -20,13 +20,11 @@ public class MemoryLoadingThread implements Runnable {
             if (!jobQueue.isEmpty()) {
                 PCB pcb = jobQueue.pollJob();
                 if (pcb != null) {
-                    // Check if process is too large for memory
                     if (pcb.getMemoryRequired() > memoryManager.getTotalMemory()) {
                         System.err.println("ERROR: Process " + pcb.getProcessId() + 
                                           " requires " + pcb.getMemoryRequired() + 
                                           "MB which exceeds total memory capacity (" + 
                                           memoryManager.getTotalMemory() + "MB). Process skipped.");
-                        // Skip this process - don't add it back to the queue
                         continue;
                     }
                     
@@ -37,14 +35,13 @@ public class MemoryLoadingThread implements Runnable {
                                           "MB, total used: " + memoryManager.getUsedMemory() + 
                                           "MB of " + memoryManager.getTotalMemory() + "MB)");
                     } else {
-                        // Put back in queue and try again later
                         jobQueue.addJob(pcb);
                     }
                 }
             }
 
             try {
-                Thread.sleep(100);  // Avoid busy-waiting
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

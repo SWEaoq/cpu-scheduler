@@ -7,8 +7,8 @@ public class PriorityScheduler implements Runnable {
     private ProcessTracker tracker;
     
     private static final int TIME_UNIT_MS = 100; 
-    private static final int AGING_INTERVAL_MS = 200; // every 200ms, effective priority increases by 1
-    private static final int STARVATION_THRESHOLD_MS = 2000; // threshold to consider a process starved
+    private static final int AGING_INTERVAL_MS = 200;
+    private static final int STARVATION_THRESHOLD_MS = 2000;
 
     public PriorityScheduler(ReadyQueue readyQueue, MemoryManager memoryManager, ProcessTracker tracker) {
         this.readyQueue = readyQueue;
@@ -18,10 +18,9 @@ public class PriorityScheduler implements Runnable {
     
     @Override
     public void run() {
-        // Wait for all jobs to be loaded
         while (!tracker.isAllProcessesFinished() && !readyQueue.isEmpty()) {
             try {
-                Thread.sleep(100); // Wait for jobs to be loaded
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -32,7 +31,7 @@ public class PriorityScheduler implements Runnable {
             if (pcb != null) {
                 long currentTime = System.currentTimeMillis();
                 long waitingTime = currentTime - pcb.getArrivalTime();
-                // If waiting time exceeds threshold, log potential starvation
+                
                 if (waitingTime >= STARVATION_THRESHOLD_MS) {
                     System.out.println("STARVATION ALERT: Process " + pcb.getProcessId() 
                                        + " has been waiting for " + waitingTime + " ms.");
@@ -64,7 +63,6 @@ public class PriorityScheduler implements Runnable {
                 SystemCalls.sysFreeMemory(memoryManager, pcb.getMemoryRequired());
                 SystemCalls.sysProcessFinished(tracker, pcb);
 
-                // Record full process execution in Gantt chart.
                 tracker.addGanttChartEntry(new GanttChartEntry(pcb.getProcessId(), startTime, finishTime));
 
                 System.out.println("PRIORITY: Process " + pcb.getProcessId() 
@@ -72,7 +70,7 @@ public class PriorityScheduler implements Runnable {
             }
             
             try {
-                Thread.sleep(50); // Avoid busy-waiting
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -91,17 +89,14 @@ public class PriorityScheduler implements Runnable {
         int highestEffectivePriority = Integer.MIN_VALUE;
         long currentTime = System.currentTimeMillis();
         
-        // First, move all processes to our temporary list
         while (!readyQueue.isEmpty()) {
             allPCBs.add(readyQueue.pollReadyPCB());
         }
         
-        // Find the highest priority process
         for (PCB pcb : allPCBs) {
             int effectivePriority = pcb.getPriority() + 
                 (int)((currentTime - pcb.getArrivalTime()) / AGING_INTERVAL_MS);
             
-            // Check for starvation
             if ((currentTime - pcb.getArrivalTime()) >= STARVATION_THRESHOLD_MS) {
                 System.out.println("STARVATION ALERT: Process " + pcb.getProcessId() 
                     + " has been waiting for " + (currentTime - pcb.getArrivalTime()) + " ms.");
@@ -113,7 +108,6 @@ public class PriorityScheduler implements Runnable {
             }
         }
         
-        // Return all except the highest back to ready queue
         for (PCB pcb : allPCBs) {
             if (pcb != highest) {
                 readyQueue.addReadyPCB(pcb);

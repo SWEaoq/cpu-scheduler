@@ -14,7 +14,4 @@ public class ReadyQueue {
     public boolean isEmpty() {
         return queue.isEmpty();
     }
-    
-    // If you want a priority-based queue for Priority Scheduling:
-    // you might switch to a PriorityQueue<PCB> with a custom comparator.
 }

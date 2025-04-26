@@ -33,7 +33,6 @@ public class RRScheduler implements Runnable {
                     }
                     long sliceEnd = System.currentTimeMillis();
 
-                    // Record execution slice
                     tracker.addGanttChartEntry(new GanttChartEntry(pcb.getProcessId(), sliceStart, sliceEnd));
 
                     pcb.setRemainingBurstTime(pcb.getRemainingBurstTime() - slice);
@@ -43,7 +42,6 @@ public class RRScheduler implements Runnable {
                         long arrival = pcb.getArrivalTime();
                         long finish = pcb.getFinishTime();
                         pcb.setTurnaroundTime((int) (finish - arrival));
-                        // Waiting time = Turnaround time - original burst time
                         pcb.setWaitingTime((int) (finish - arrival - pcb.getBurstTime()));
 
                         System.out.println("RR: Process " + pcb.getProcessId() + " finished.");

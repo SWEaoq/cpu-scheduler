@@ -1,6 +1,3 @@
-/**
- * Enumeration for process states.
- */
 enum ProcessState {
     NEW,
     READY,
@@ -11,41 +8,34 @@ enum ProcessState {
 
 public class PCB {
     
-    // Basic process info
     private int processId;
     private int burstTime;
-    private int remainingBurstTime;  
-    private int priority;            // lower number = lower priority
-    private int memoryRequired;      // in MB
+    private int remainingBurstTime;
+    private int priority;
+    private int memoryRequired;
     
-    // Timing metrics
-    private int waitingTime;         // how long the process spent waiting in the ready queue
-    private int turnaroundTime;      // total time from arrival to completion
+    private int waitingTime;
+    private int turnaroundTime;
     
-    // Additional info
-    private ProcessState state;      // NEW, READY, RUNNING, WAITING, TERMINATED
-    private long arrivalTime;         // to track arrival times
-    private long startTime;           // time the process first got the CPU
-    private long finishTime;          // time the process finished
+    private ProcessState state;
+    private long arrivalTime;
+    private long startTime;
+    private long finishTime;
 
     public PCB(int processId, int burstTime, int priority, int memoryRequired, long arrivalTime) {
         this.processId = processId;
         this.burstTime = burstTime;
-        this.remainingBurstTime = burstTime; // to be decremented during scheduling
+        this.remainingBurstTime = burstTime;
         this.priority = priority;
         this.memoryRequired = memoryRequired;
         this.arrivalTime = arrivalTime;
         
         this.waitingTime = 0;
         this.turnaroundTime = 0;
-        this.startTime = -1;  // indicates not started yet
-        this.finishTime = -1; // indicates not finished yet
+        this.startTime = -1;
+        this.finishTime = -1;
         this.state = ProcessState.NEW;
     }
-
-    // -------------------
-    // Getters and Setters
-    // -------------------
 
     public int getProcessId() {
         return processId;

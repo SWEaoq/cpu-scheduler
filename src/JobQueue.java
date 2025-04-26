@@ -8,7 +8,7 @@ public class JobQueue {
     }
 
     public PCB pollJob() {
-        return queue.poll();  // returns null if empty
+        return queue.poll();
     }
 
     public boolean isEmpty() {

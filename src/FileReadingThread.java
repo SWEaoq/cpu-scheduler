@@ -61,13 +61,11 @@ public class FileReadingThread implements Runnable {
                         if (parts.length == 2) {
                             String[] subParts = parts[0].split(":");
                             if (subParts.length == 3) {
-                                // Try parsing the process ID
                                 Integer.parseInt(subParts[0].trim());
                                 count++;
                             }
                         }
                     } catch (NumberFormatException e) {
-                        // Skip invalid lines
                     }
                 }
             }
@@ -82,7 +80,6 @@ public class FileReadingThread implements Runnable {
     private void parseAndAddJob(String line) {
         try {
             line = line.trim();
-            // Skip comment lines or empty lines
             if (line.isEmpty() || line.startsWith("//")) {
                 return;
             }
@@ -99,7 +96,6 @@ public class FileReadingThread implements Runnable {
                 return;
             }
     
-            // Validate each part
             int processId;
             try {
                 processId = Integer.parseInt(subParts[0].trim());
@@ -129,11 +125,11 @@ public class FileReadingThread implements Runnable {
                 priority = Integer.parseInt(subParts[2].trim());
                 if (priority < 1 || priority > 8) {
                     System.err.println("Warning: Priority must be between 1-8: " + subParts[2] + " - using default of 1");
-                    priority = 1;  // Use default priority instead of skipping
+                    priority = 1;
                 }
             } catch (NumberFormatException e) {
                 System.err.println("Warning: Invalid Priority (must be an integer): " + subParts[2] + " - using default of 1");
-                priority = 1;  // Use default priority
+                priority = 1;
             }
             
             int memoryRequired;
