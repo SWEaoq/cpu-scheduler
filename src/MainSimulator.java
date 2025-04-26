@@ -108,7 +108,7 @@ public class MainSimulator {
 
         if (!tracker.getGanttChartEntries().isEmpty()) {
             long simulationStart = tracker.getGanttChartEntries().get(0).getStartTime();
-            System.out.println("\nGantt Chart (relative times in ms):");
+            System.out.println("\nGantt Chart:");
             System.out.println("-------------------------------------------------");
             System.out.println("| Start (ms) | End (ms)  | Process ID |");
             System.out.println("-------------------------------------------------");
