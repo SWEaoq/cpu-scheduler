@@ -14,10 +14,14 @@ public class MainSimulator {
             System.out.print("Enter total memory (e.g., 2048): ");
             try {
                 totalMemory = input.nextInt();
+                if (totalMemory <= 0) {
+                    System.out.println("Error: Memory size must be positive");
+                    continue;
+                }
                 validInput = true;
             } catch (java.util.InputMismatchException e) {
                 System.out.println("Error: Please enter a valid number");
-                input.nextLine(); // Clear the invalid input
+                input.nextLine();
             }
         }
 
@@ -116,17 +120,20 @@ public class MainSimulator {
         System.out.println("Average Turnaround Time: " + tracker.getAverageTurnaroundTime() + " ms");
 
         if (!tracker.getGanttChartEntries().isEmpty()) {
-            long simulationStart = tracker.getGanttChartEntries().get(0).getStartTime();
-            System.out.println("\nGantt Chart:");
-            System.out.println("-------------------------------------------------");
-            System.out.println("| Start (ms) | End (ms)  | Process ID |");
-            System.out.println("-------------------------------------------------");
-            for (GanttChartEntry entry : tracker.getGanttChartEntries()) {
-                long relativeStart = entry.getStartTime() - simulationStart;
-                long relativeEnd = entry.getEndTime() - simulationStart;
-                System.out.printf("| %-10d | %-9d | %-10d |\n", relativeStart, relativeEnd, entry.getProcessId());
-            }
-            System.out.println("-------------------------------------------------");
+            GanttChart chart = new GanttChart(tracker.getGanttChartEntries());
+            chart.displayWithTimeline();  // Use displayWithTimeline for the visual version
+            // or chart.display() for the original table-only version
+            // long simulationStart = tracker.getGanttChartEntries().get(0).getStartTime();
+            // System.out.println("\nGantt Chart:");
+            // System.out.println("-------------------------------------------------");
+            // System.out.println("| Start (ms) | End (ms)  | Process ID |");
+            // System.out.println("-------------------------------------------------");
+            // for (GanttChartEntry entry : tracker.getGanttChartEntries()) {
+            //     long relativeStart = entry.getStartTime() - simulationStart;
+            //     long relativeEnd = entry.getEndTime() - simulationStart;
+            //     System.out.printf("| %-10d | %-9d | %-10d |\n", relativeStart, relativeEnd, entry.getProcessId());
+            // }
+            // System.out.println("-------------------------------------------------");
         }
     }
 

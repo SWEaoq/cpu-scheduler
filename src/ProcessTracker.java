@@ -20,7 +20,11 @@ public class ProcessTracker {
     }
 
     public synchronized boolean isAllProcessesFinished() {
-        return completedProcesses >= totalProcesses;
+        if (completedProcesses >= totalProcesses) {
+            return true;
+        } else {
+            return false;
+        }
     }
     
     public double getAverageWaitingTime() {
@@ -28,7 +32,11 @@ public class ProcessTracker {
         for (PCB pcb : finishedProcesses) {
             sum += pcb.getWaitingTime();
         }
-        return finishedProcesses.size() > 0 ? sum / finishedProcesses.size() : 0;
+        if (finishedProcesses.size() > 0) {
+            return sum / finishedProcesses.size();
+        } else {
+            return 0;
+        }
     }
     
     public double getAverageTurnaroundTime() {
@@ -36,7 +44,11 @@ public class ProcessTracker {
         for (PCB pcb : finishedProcesses) {
             sum += pcb.getTurnaroundTime();
         }
-        return finishedProcesses.size() > 0 ? sum / finishedProcesses.size() : 0;
+        if (finishedProcesses.size() > 0) {
+            return sum / finishedProcesses.size();
+        } else {
+            return 0;
+        }
     }
     
     public synchronized void addGanttChartEntry(GanttChartEntry entry) {
