@@ -61,11 +61,17 @@ public class FileReadingThread implements Runnable {
                         if (parts.length == 2) {
                             String[] subParts = parts[0].split(":");
                             if (subParts.length == 3) {
-                                Integer.parseInt(subParts[0].trim());
-                                count++;
+                                int processId = Integer.parseInt(subParts[0].trim());
+                                int burstTime = Integer.parseInt(subParts[1].trim());
+                                int memoryRequired = Integer.parseInt(parts[1].trim());
+                                
+                                if (processId > 0 && burstTime > 0 && memoryRequired > 0) {
+                                    count++;
+                                }
                             }
                         }
                     } catch (NumberFormatException e) {
+
                     }
                 }
             }
